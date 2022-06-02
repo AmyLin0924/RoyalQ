@@ -41,6 +41,17 @@ struct Info: Codable {
 }
 
 
+struct Authorization: Encodable {
+    let authorization: String
+}
+
+struct AuthResponse: Decodable {
+//    let data: Info
+    let code: Int
+//    let msg: String
+}
+
+
 class LogInViewController: UIViewController {
     
     @IBOutlet weak var m_imgWall: UIImageView!
@@ -60,8 +71,8 @@ class LogInViewController: UIViewController {
         let strIsLogIn = UserDefaults.standard.string(forKey: "isLogIn")
         let bLogInStatus: Bool = (strIsLogIn == "1") ? true : false
         let bOver5min:Bool = compareDate()
-        
-        if bLogInStatus && bOver5min {
+        //&& bOver5min
+        if bLogInStatus  {
             renewInfo()
         }
         
@@ -210,22 +221,32 @@ class LogInViewController: UIViewController {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         let encoder = JSONEncoder()
         
-        let info = ["Authorization":m_strAuthToken]
+        let info = Authorization(authorization: m_strAuthToken)
         let data = try? encoder.encode(info)
         request.httpBody = data
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let data = data {
                 do {
                     let decoder = JSONDecoder()
-                    let infoResponse = try decoder.decode(LogInResponse.self, from: data)
-                    print(infoResponse)
-                    if infoResponse.code == 200 {
-                       
-                        print("Upload")
+//                    let infoResponse = try decoder.decode(AuthResponse.self, from: data)
+//                    print(infoResponse)
+                    
+                    if let json = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers),
+                        let jsonData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+                    {
+                        print("\n---> response json: " + String(decoding: jsonData, as: UTF8.self))
                         
-                    }else {
-                        print("ErrorMSG == \(infoResponse.msg)")
+                    } else {
+                        print("=========> json data malformed")
+                        
                     }
+                    
+                    
+//                    if infoResponse.code == 200 {
+//                        print("Upload")
+//                    }else {
+////                        print("ErrorMSG == \(infoResponse.msg)")
+//                    }
                 } catch  {
                     print(error)
                 }
