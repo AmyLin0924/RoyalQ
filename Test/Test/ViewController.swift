@@ -80,6 +80,7 @@ class ViewController: UIViewController {
     
     func logIn(DragX: CGFloat) {
         let strX: String = "\(DragX)"
+        print("test")
 
         
         
